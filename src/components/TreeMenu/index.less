@@ -1,0 +1,24 @@
+.tree {
+  color: rgba(255, 255, 255, 0.65);
+  background-color: #232f34;
+  :global {
+    .ant-tree-treenode {
+      &:hover::before {
+        color: rgba(255, 255, 255, 0.65);
+        background-color: rgba(0, 0, 0, 0.85) !important;
+      }
+    }
+    .ant-tree-node-selected {
+      color: rgba(255, 255, 255, 0.65);
+      .anticon {
+        color: rgba(255, 255, 255, 0.65);
+      }
+    }
+    .anticon {
+      color: #26a69a;
+    }
+    .ant-tree-switcher-icon {
+      color: rgba(255, 255, 255, 0.65);
+    }
+  }
+}

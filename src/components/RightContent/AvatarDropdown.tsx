@@ -1,12 +1,16 @@
 import React, { useCallback } from 'react';
-import { LogoutOutlined } from '@ant-design/icons';
+import { HomeOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Avatar, Menu, Spin } from 'antd';
 import { history, useModel } from 'umi';
 import { stringify } from 'querystring';
 import HeaderDropdown from '../HeaderDropdown';
 import styles from './index.less';
 import { outLogin } from '@/services/ant-design-pro/api';
+import tagUtil from '@/utils/tags';
 
+const {
+  method: { dealTags },
+} = tagUtil;
 export type GlobalHeaderRightProps = {
   menu?: boolean;
 };
@@ -29,6 +33,20 @@ const loginOut = async () => {
   }
 };
 
+/**
+ * 工作台，应用
+ */
+const platform = () => {
+  const openTag = {
+    operate: 'openTag',
+    params: {
+      path: '/welcome',
+      query: '',
+    },
+  };
+  dealTags(openTag);
+};
+
 const AvatarDropdown: React.FC<GlobalHeaderRightProps> = () => {
   const { initialState, setInitialState } = useModel('@@initialState');
 
@@ -44,8 +62,10 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = () => {
         setInitialState({ ...initialState, currentUser: undefined });
         loginOut();
         return;
+      } else if (key === 'platform') {
+        platform();
+        return;
       }
-      history.push(`/account/${key}`);
     },
     [initialState, setInitialState],
   );
@@ -75,6 +95,10 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = () => {
   const menuHeaderDropdown = (
     // @ts-ignore
     <Menu className={styles.menu} selectedKeys={[]} onClick={onMenuClick}>
+      <Menu.Item key="platform">
+        <HomeOutlined />
+        应用管理
+      </Menu.Item>
       <Menu.Item key="logout">
         <LogoutOutlined />
         退出登录

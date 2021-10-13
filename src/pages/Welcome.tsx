@@ -1,32 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Form, Input, Modal, notification, Popconfirm, Tabs } from 'antd';
+import { Form, Input, message, Modal, notification, Popconfirm, Space, Tabs } from 'antd';
 import {
   DeleteOutlined,
-  DesktopOutlined,
   EditOutlined,
   EllipsisOutlined,
   PlusCircleOutlined,
-  SaveOutlined,
-  SettingOutlined,
-  SyncOutlined,
 } from '@ant-design/icons';
 import ProCard from '@ant-design/pro-card';
 import styles from './Welcome.less';
 import { deleteApps, getApps, setApps } from '../services/app/api';
-import TabPane from '@ant-design/pro-card/lib/components/TabPane';
-import MonacoEditor from 'react-monaco-editor';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution';
+import { history, KeepAlive } from 'umi';
+import TabPane from '@ant-design/pro-card/es/components/TabPane';
+import ManageList from '@/components/ManageList';
+import { useModel } from '@@/plugin-model/useModel';
 
-export default (): React.ReactNode => {
+function Welcome() {
+  // 保存应用数据
   const [appArray, setAppArray] = useState([]);
   const initialItem: API.AppItem = {};
+  // 保存当前选中的应用数据
   const [nowItem, setNowItem] = useState(initialItem);
+  // 标识是否打开新建或编辑弹出框
   const [visible, setVisible] = useState(false);
+  // 抽屉组件点击确定时的loading
   const [confirmLoading, setConfirmLoading] = useState(false);
+  // 抽屉组件的标题-新建应用/编辑应用
   const [title, setTitle] = useState('新建应用');
-  const [componentVisible, setComponentVisible] = useState(false);
+  const [activeKey, setActiveKey] = useState('1');
   const [form] = Form.useForm();
+  const { setInitialState, initialState } = useModel('@@initialState');
 
   const getApp = (params?: API.AppItem) => {
     const initialParams: API.AppItem = params ? params : { type: 'App' };
@@ -49,9 +53,6 @@ export default (): React.ReactNode => {
       });
   };
   const setApp = (params: API.AppItem) => {
-    if (title === '新建应用') {
-      delete params.id;
-    }
     setApps({ ...params, type: 'App' })
       .then((res) => {
         setVisible(false);
@@ -63,6 +64,7 @@ export default (): React.ReactNode => {
             message: '',
           });
         } else {
+          message.success('保存成功');
           getApp();
         }
       })
@@ -95,6 +97,8 @@ export default (): React.ReactNode => {
         });
       });
   };
+
+  /** 点击新建或编辑应用按钮时的操作 **/
   const updateOrAdd = (item?: API.AppItem, flag?: string) => {
     form.resetFields();
     if (item && flag === 'update') {
@@ -106,149 +110,165 @@ export default (): React.ReactNode => {
     setVisible(true);
   };
 
-  useEffect(() => {
+  const initialEffect = () => {
+    const appId = localStorage.getItem('appId') ? (localStorage.getItem('appId') as string) : '';
+    localStorage.setItem('appId', appId);
     getApp();
-  }, []);
-
-  const ComponentEditor = () => {
-    return (
-      <Modal
-        title={
-          <div className={styles.title}>
-            <div style={{ color: '#999', fontSize: '14px' }}>
-              {nowItem.type}-{nowItem.name}
-            </div>
-            <div className={styles.btn}>
-              <div>
-                <Button icon={<SyncOutlined />}>刷新</Button>
-              </div>
-              <div>
-                <Button icon={<DesktopOutlined />}>预览</Button>
-              </div>
-              <div>
-                <Button icon={<SaveOutlined />}>保存</Button>
-              </div>
-            </div>
-          </div>
-        }
-        visible={componentVisible}
-        className={styles.myModal}
-        onCancel={() => {
-          setComponentVisible(false);
-        }}
-        footer={null}
-      >
-        <Tabs type="card">
-          <TabPane tab="自定义js" key="1">
-            <div style={{ height: 'calc(100vh - 150px)', border: '1px solid #dedbdb' }}>
-              <div style={{ height: '100%', width: '100%' }}>
-                <MonacoEditor
-                  language="javascript"
-                  value={'<div>324234</div>'}
-                  options={{ selectOnLineNumbers: true, tabSize: 2 }}
-                />
-              </div>
-            </div>
-          </TabPane>
-          <TabPane tab="Python" key="2">
-            <div style={{ height: 'calc(100vh - 150px)', border: '1px solid #dedbdb' }}>
-              <div style={{ height: '100%', width: '100%' }}>
-                <MonacoEditor
-                  language="python"
-                  value={'<div>324234</div>'}
-                  options={{ selectOnLineNumbers: true, tabSize: 2 }}
-                />
-              </div>
-            </div>
-          </TabPane>
-        </Tabs>
-      </Modal>
-    );
   };
 
-  const extraContent = [
-    <Button key="2">
-      <SettingOutlined />
-      组件管理
-    </Button>,
-    <Button
-      key="1"
-      type="primary"
-      onClick={() => {
-        setTitle('新建应用');
-        updateOrAdd();
-      }}
-    >
-      <PlusCircleOutlined />
-      新建应用
-    </Button>,
-  ];
+  useEffect(() => {
+    console.log('welcome mount');
+    initialEffect();
+  }, []);
+
+  const modalOk = () => {
+    setConfirmLoading(true);
+    form
+      .validateFields()
+      .then((values) => {
+        const params: API.AppItem = {
+          id: nowItem?.id,
+          ...values,
+        };
+        if (title === '新建应用') {
+          delete params.id;
+        }
+        setApp(params);
+      })
+      .catch(() => {
+        setConfirmLoading(false);
+      });
+  };
+
+  /** 进入app逻辑 **/
+  const intoApp = (item: any) => {
+    history.push({
+      pathname: '/componentList',
+      query: { id: item.id },
+      state: { name: item.name },
+    });
+    localStorage.setItem('appId', item.id);
+    localStorage.setItem('menu_mode', 'element');
+    // 刷新左侧菜单，重新设置appId的值
+    setInitialState({ ...initialState, appId: item.id });
+  };
+
+  const callback = (key: string) => {
+    setActiveKey(key);
+  };
+
+  const MyTab = () => (
+    <Tabs defaultActiveKey="1" activeKey={activeKey} className={styles.tabs} onChange={callback}>
+      <TabPane tab="应用管理" key="1"></TabPane>
+      <TabPane tab="组件管理" key="2"></TabPane>
+    </Tabs>
+  );
+
+  // 父子组件通信
+  const Manage = forwardRef(ManageList);
+  const childRef = useRef();
+
   return (
-    <PageContainer extra={extraContent}>
-      <ProCard gutter={[24, 24]} wrap={true} className={styles.card}>
-        {appArray &&
-          appArray.length > 0 &&
-          appArray.map((item: any) => {
-            return (
-              <ProCard
-                key={item.id}
-                title={item.name}
-                colSpan={8}
-                bordered={true}
-                actions={[
-                  <EditOutlined
-                    key="edit"
-                    onClick={() => {
-                      setTitle('修改应用');
-                      updateOrAdd(item, 'update');
+    <PageContainer
+      fixedHeader
+      title={
+        <div>
+          <div
+            className={styles.operate}
+            onClick={() => {
+              if (activeKey === '1') {
+                setTitle('新建应用');
+                updateOrAdd();
+              } else {
+                const current = childRef.current as any;
+                const addComponent = current?.addComponent;
+                addComponent();
+              }
+            }}
+          >
+            <Space>
+              <PlusCircleOutlined />
+              <div>{activeKey === '1' ? '新建应用' : '新建组件'}</div>
+            </Space>
+          </div>
+          <MyTab />
+        </div>
+      }
+    >
+      {activeKey === '1' ? (
+        <div>
+          <ProCard gutter={[24, 24]} wrap={true} className={styles.card}>
+            {appArray &&
+              appArray.length > 0 &&
+              appArray.map((item: any) => {
+                return (
+                  <ProCard
+                    hoverable
+                    key={item.id}
+                    title={item.name}
+                    colSpan={6}
+                    bordered={true}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      intoApp(item);
                     }}
-                  />,
-                  <Popconfirm
-                    title="确定删除该应用吗?"
-                    onConfirm={() => deleteApp({ id: item.id })}
-                    placement="top"
-                    okText="确定"
-                    cancelText="取消"
+                    actions={[
+                      <EditOutlined
+                        key="edit"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTitle('修改应用');
+                          updateOrAdd(item, 'update');
+                        }}
+                      />,
+                      <Popconfirm
+                        title="确定删除该应用吗?"
+                        onConfirm={(e) => {
+                          e?.stopPropagation();
+                          deleteApp({ id: item.id });
+                        }}
+                        onCancel={(e) => e?.stopPropagation()}
+                        placement="top"
+                        okText="确定"
+                        cancelText="取消"
+                      >
+                        <DeleteOutlined onClick={(e) => e.stopPropagation()} />
+                      </Popconfirm>,
+                      <EllipsisOutlined
+                        key="ellipsis"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // 跳转到编辑视图页面
+                          history.push({
+                            pathname: '/customerJs',
+                            query: {
+                              id: item.id,
+                            },
+                            state: { name: item.name },
+                          });
+                        }}
+                      />,
+                    ]}
                   >
-                    <DeleteOutlined />
-                  </Popconfirm>,
-                  <EllipsisOutlined
-                    key="ellipsis"
-                    onClick={() => {
-                      setNowItem(item);
-                      setComponentVisible(true);
-                    }}
-                  />,
-                ]}
-              >
-                <div>{item.desc}</div>
-              </ProCard>
-            );
-          })}
-      </ProCard>
+                    <div>{item.desc}</div>
+                  </ProCard>
+                );
+              })}
+          </ProCard>
+        </div>
+      ) : (
+        <Manage ref={childRef} />
+      )}
+
       <Modal
         visible={visible}
         title={title}
         confirmLoading={confirmLoading}
         onCancel={() => {
-          form.resetFields();
+          setConfirmLoading(false);
           setVisible(!visible);
         }}
-        onOk={() => {
-          setConfirmLoading(true);
-          form
-            .validateFields()
-            .then((values) => {
-              const params: API.AppItem = {
-                id: nowItem?.id,
-                ...values,
-              };
-              setApp(params);
-            })
-            .catch(() => {
-              setConfirmLoading(false);
-            });
-        }}
+        onOk={modalOk}
       >
         <Form name="basic" form={form} initialValues={{ ...nowItem }}>
           <Form.Item
@@ -267,7 +287,18 @@ export default (): React.ReactNode => {
           </Form.Item>
         </Form>
       </Modal>
-      <ComponentEditor />
     </PageContainer>
+  );
+}
+
+export default (): React.ReactNode => {
+  return (
+    <KeepAlive
+      id={location.pathname + location.search}
+      name={location.pathname + location.search}
+      saveScrollPosition="screen"
+    >
+      <Welcome />
+    </KeepAlive>
   );
 };

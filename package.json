@@ -19,7 +19,6 @@
     "lint:prettier": "prettier --check \"src/**/*\" --end-of-line auto",
     "lint:style": "stylelint --fix \"src/**/*.less\" --syntax less",
     "openapi": "umi openapi",
-    "precommit": "lint-staged",
     "prettier": "prettier -c --write \"src/**/*\"",
     "start": "cross-env UMI_ENV=dev umi dev",
     "start:dev": "cross-env REACT_APP_ENV=dev MOCK=none UMI_ENV=dev umi dev",
@@ -54,6 +53,7 @@
     "@ant-design/pro-table": "^2.30.8",
     "@umijs/plugin-qiankun": "^2.33.1",
     "@umijs/route-utils": "^1.0.36",
+    "ahooks": "^2.10.9",
     "antd": "^4.14.0",
     "classnames": "^2.2.6",
     "lodash": "^4.17.11",
@@ -68,7 +68,8 @@
     "react-monaco-editor": "^0.45.0",
     "redux": "^4.1.1",
     "redux-thunk": "^2.3.0",
-    "umi": "^v3.4.0"
+    "umi": "^v3.4.0",
+    "umi-plugin-keep-alive": "^0.0.1-beta.29"
   },
   "devDependencies": {
     "@ant-design/pro-cli": "^2.0.2",
@@ -107,8 +108,5 @@
   },
   "engines": {
     "node": ">=10.0.0"
-  },
-  "gitHooks": {
-    "commit-msg": "fabric verify-commit"
   }
 }

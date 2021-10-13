@@ -1,24 +1,30 @@
 import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
 import { PageLoading } from '@ant-design/pro-layout';
-import { notification } from 'antd';
+import { notification, Select } from 'antd';
+// @ts-ignore
 import type { RequestConfig, RunTimeLayoutConfig } from 'umi';
-import { history, MicroApp } from 'umi';
+import { dynamic, history } from 'umi';
 import TagView from '@/components/TagView';
-import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
-import { MenuDataItem } from '@ant-design/pro-layout/lib/typings';
-import { createRef, ReactChild, ReactFragment, ReactPortal } from 'react';
-import tagUtil from '@/utils/tags';
+import type { ReactChild, ReactFragment, ReactPortal } from 'react';
+import { createRef } from 'react';
+import { ApartmentOutlined, FolderViewOutlined, LeftOutlined } from '@ant-design/icons';
+import styles from './app.less';
+import { loopMenuItem } from './access';
+import { getApps } from '@/services/app/api';
+import TreeMenu from '@/components/TreeMenu';
+import { Key } from 'rc-select/lib/interface/generator';
 
+const { Option } = Select;
 const logoInfo = require('/public/logo-seepln-easyview1.png');
-const {
-  method: { dealTags },
-} = tagUtil;
+const logoIco = require('/public/logo1.png');
 const loginPath = '/user/login';
 
 /** 获取用户信息比较慢的时候会展示一个 loading */
 export const initialStateConfig = {
   loading: <PageLoading />,
 };
+
+export const layoutActionRef = createRef<{ reload: () => void | undefined }>();
 
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
@@ -27,28 +33,47 @@ export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
   currentUser?: API.CurrentUser;
   fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
+  collapsed?: boolean; // 自定义菜单栏收缩展开
+  appId?: string | number | null; // 应用id
+  menuMode?: string | null | undefined; //菜单类型，菜单/资源管理器
+  projectArray?: any[]; // 菜单项目下拉数据
+  currentProject?: string; // 当前选中的菜单下拉数据
 }> {
   const fetchUserInfo = async () => {
     try {
-      const currentUser = await queryCurrentUser();
+      const currentUser = {
+        name: 'Guest',
+        avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
+      };
       return currentUser;
     } catch (error) {
       history.push(loginPath);
     }
     return undefined;
   };
+  const menuMode = localStorage.getItem('menu_mode') ? localStorage.getItem('menu_mode') : 'menu';
   // 如果是登录页面，不执行
   if (history.location.pathname !== loginPath) {
     const currentUser = await fetchUserInfo();
     return {
+      appId: localStorage.getItem('appId'),
+      menuMode,
       fetchUserInfo,
+      collapsed: false,
       currentUser,
       settings: {},
+      projectArray: [],
+      currentProject: '',
     };
   }
   return {
+    appId: localStorage.getItem('appId'),
+    menuMode,
+    collapsed: false,
     fetchUserInfo,
     settings: {},
+    projectArray: [],
+    currentProject: '',
   };
 }
 
@@ -73,9 +98,9 @@ export async function getInitialState(): Promise<{
  * @see https://beta-pro.ant.design/docs/request-cn
  */
 export const request: RequestConfig = {
+  // @ts-ignore
   errorHandler: (error: any) => {
     const { response } = error;
-
     if (!response) {
       notification.error({
         description: '您的网络发生异常，无法连接服务器',
@@ -94,89 +119,18 @@ const dynamicRoute = {
       entry: '//localhost:7104', //本地启动
     },
   ],
-  routes: [
-    {
-      name: 'myHtml',
-      path: '/myHtml',
-      microApp: 'myHtml',
-    },
-  ],
 };
-
-let menusData: MenuDataItem[] = [
-  {
-    path: '/welcome',
-    name: '我的应用',
-    component: './Welcome',
-  },
-  {
-    path: '/admin',
-    name: '管理页',
-    access: 'canAdmin',
-    component: './Admin',
-    routes: [
-      {
-        path: '/admin/sub-page',
-        name: '二级管理页',
-        component: './Welcome',
-      },
-    ],
-  },
-  {
-    name: '查询表格',
-    path: '/list',
-    component: './TableList',
-  },
-  {
-    name: '我的html',
-    path: '/myHtml/index',
-  },
-  {
-    name: '我的html1',
-    path: '/myHtml/index1',
-  },
-  {
-    name: '我的html2',
-    path: '/myHtml/index2',
-  },
-];
-export const layoutActionRef = createRef<{ reload: () => void | undefined }>();
-const app = () => (
-  <MicroApp
-    name="myHtml"
-    dealTags={dealTags}
-    autoSetLoading
-    refreshMenu={(data: MenuDataItem[]) => {
-      menusData = data;
-      layoutActionRef.current?.reload();
-    }}
-  />
-);
 
 const newRoutes = [
   {
     name: 'myHtml',
-    path: '/myHtml/index',
+    path: '/myHtml/:id',
     exact: true,
-    icon: 'smile',
     key: 'myHtml',
-    component: app, // 设置自定义 loading 动画
-  },
-  {
-    name: 'myHtml1',
-    path: '/myHtml/index1',
-    exact: true,
-    icon: 'smile',
-    key: 'myHtml1',
-    component: app, // 设置自定义 loading 动画
-  },
-  {
-    name: 'myHtml2',
-    path: '/myHtml/index2',
-    exact: true,
-    icon: 'smile',
-    key: 'myHtml2',
-    component: app, // 设置自定义 loading 动画
+    hideInMenu: true,
+    component: dynamic({
+      loader: () => import('@/pages/MyHtmlMicro'),
+    }),
   },
 ];
 
@@ -188,20 +142,181 @@ export function patchRoutes(props: { routes: any }) {
 }
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
-// @ts-ignore
-export const layout: RunTimeLayoutConfig = ({ initialState }) => {
+//@ts-ignore
+export const layout: RunTimeLayoutConfig = (initialModel) => {
+  const { initialState, setInitialState } = initialModel;
+  const menuMode = initialState?.menuMode;
+  const projectArray = initialState?.projectArray;
   return {
+    navTheme: 'dark',
+    collapsed: initialState?.collapsed,
+    collapsedButtonRender: false,
+    className: styles.layout,
+    menuExtraRender: (res) => {
+      if (menuMode && menuMode === 'menu') {
+        const { collapsed } = res;
+        return (
+          !collapsed && (
+            <Select
+              value={initialState.currentProject}
+              className={styles.mySelect}
+              dropdownClassName={styles.option}
+              onChange={(value) => setInitialState({ ...initialState, currentProject: value })}
+            >
+              {projectArray && projectArray.length > 0
+                ? projectArray.map((item: { title: string; id: Key }) => {
+                    return (
+                      <Option key={item.id} value={item.id}>
+                        {item.title}
+                      </Option>
+                    );
+                  })
+                : null}
+            </Select>
+          )
+        );
+      } else {
+        return <TreeMenu />;
+      }
+    },
+    menuItemRender: (item) => {
+      if (menuMode && menuMode === 'menu') {
+        if (item && item.type === 'split') {
+          if (!initialState?.collapsed) {
+            return <div className={styles.title}>{item.name}</div>;
+          }
+          return (
+            <div className={styles.title}>
+              <ApartmentOutlined />
+            </div>
+          );
+        }
+        return (
+          <div className={styles.path}>
+            <a
+              onClick={() => {
+                if (item && item.path) {
+                  history.push({
+                    pathname: item.path,
+                  });
+                }
+              }}
+            >
+              {item.icon}
+              <span style={{ marginLeft: 10 }}>{item.name}</span>
+            </a>
+          </div>
+        );
+      } else {
+        return false;
+      }
+    },
+    subMenuItemRender: (_, dom) => {
+      if (menuMode && menuMode === 'menu') {
+        return <div>{dom}</div>;
+      } else {
+        return false;
+      }
+    },
+    actionRef: layoutActionRef,
+    menu: {
+      locale: false,
+      params: {
+        appId: initialState?.appId,
+        currentProject: initialState?.currentProject,
+      },
+      request: async (params: { appId: any }) => {
+        const { appId } = params;
+        let data: any[] = [{}];
+        if (menuMode === 'menu') {
+          if (appId) {
+            const { res } = await getApps({
+              app: localStorage.getItem('appId'),
+              type: 'Menu',
+            });
+            if (res && res.err) {
+              notification.error({
+                description: res.err,
+                message: '',
+              });
+            } else {
+              //获取当前appId下的主菜单type为Menu，key为main
+              if (res && res.length) {
+                const menu = res.filter((temp: { key: string }) => temp.key === 'main');
+                if (menu && menu.length) {
+                  const projectValue = initialState?.currentProject
+                    ? initialState.currentProject
+                    : menu[0].content && menu[0].content.length > 0
+                    ? menu[0].content[0].id
+                    : '';
+                  setInitialState({
+                    ...initialState,
+                    currentProject: projectValue,
+                    projectArray: menu[0].content
+                      ? JSON.parse(JSON.stringify(menu[0].content))
+                      : [],
+                  });
+                  //不能直接返回空数组，若是无数据，需返回，[{}]!!!!!!!!!!
+                  data = await loopMenuItem(menu[0].content, projectValue);
+                }
+              }
+            }
+          }
+        }
+        return data;
+      },
+    },
+    menuFooterRender: (props) => {
+      return (
+        <a
+          style={{
+            lineHeight: '48rpx',
+            display: 'flex',
+            height: 36,
+            color: '#fff',
+            alignItems: 'center',
+            marginLeft: initialState?.collapsed ? 0 : 16,
+            fontSize: 13,
+            justifyContent: initialState?.collapsed ? 'center' : '',
+          }}
+          onClick={() => {
+            localStorage.setItem('menu_mode', menuMode === 'menu' ? 'element' : 'menu');
+            const newAppId = menuMode === 'menu' ? '' : localStorage.getItem('appId');
+            setInitialState({
+              ...initialState,
+              menuMode: localStorage.getItem('menu_mode'),
+              appId: newAppId,
+            });
+          }}
+        >
+          {!props?.collapsed &&
+            (initialState?.menuMode === 'element' ? (
+              <LeftOutlined style={{ fontSize: 16, marginRight: 4 }} />
+            ) : (
+              <FolderViewOutlined style={{ fontSize: 16, marginRight: 4 }} />
+            ))}
+          {!props?.collapsed && (initialState?.menuMode === 'element' ? '菜单' : '资源管理器')}
+        </a>
+      );
+    },
     contentStyle: {
       paddingTop: '0px',
     },
     setting: {
       primaryColor: 'red',
     },
-    logo: logoInfo,
-    menuHeaderRender: (logo) => <div id="customize_menu_header">{logo}</div>,
+    logo: () => {
+      return initialState?.collapsed ? <img src={logoIco} /> : <img src={logoInfo} />;
+    },
+    onMenuHeaderClick: () => {
+      history.push({
+        pathname: '/welcome',
+      });
+    },
+    menuHeaderRender: (
+      logo: boolean | ReactChild | ReactFragment | ReactPortal | null | undefined,
+    ) => <div id="customize_menu_header">{logo}</div>,
     disableContentMargin: false,
-    headerRender: () => false,
-    // rightContentRender: () => <RightContent />,
     onPageChange: () => {
       const { location } = history;
       // 如果没有登录，重定向到 login
@@ -209,27 +324,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
         history.push(loginPath);
       }
     },
-    actionRef: layoutActionRef,
-    menu: {
-      locale: false,
-      request: async () => {
-        console.log('===重新请求菜单', menusData);
-        return menusData; //不能直接返回空数组，若是无数据，需返回，[{}]
-      },
-    },
-    childrenRender: (
-      children: boolean | ReactChild | ReactFragment | ReactPortal | null | undefined,
-    ) => {
-      return (
-        <>
-          {initialState?.currentUser && location.pathname !== loginPath ? (
-            <TagView children={children} home="/welcome" />
-          ) : (
-            children
-          )}
-        </>
-      );
-    },
+    rightContentRender: () => <TagView home="/welcome" />,
     ...initialState?.settings,
   };
 };
@@ -237,9 +332,9 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
 export const qiankun = Promise.resolve({
   // 注册子应用信息
   apps: dynamicRoute.apps,
-  jsSandbox: true,
   prefetch: true,
-  // sandbox: {strictStyleIsolation: true},
+  sandbox: true,
+  lifeCycles: {},
 });
 
 export async function render(oldRender: any) {

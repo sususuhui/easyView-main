@@ -1,0 +1,64 @@
+.extraContent {
+  width: 500px;
+  max-height: 500px;
+  padding: 20px 0;
+  overflow: auto;
+  .title {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    color: #26a69a;
+    font-size: 14px;
+    line-height: 1;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  .content {
+    display: flex;
+    flex-flow: row wrap;
+    margin-right: -12px;
+    margin-left: -12px;
+    font-size: 12px;
+    row-gap: 0;
+    div {
+      padding-right: 12px;
+      padding-left: 12px;
+      a {
+        display: block;
+        margin-bottom: 12px;
+        overflow: hidden;
+        color: rgba(0, 0, 0, 0.85);
+        font-style: normal;
+        line-height: 1.5;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        &:hover {
+          color: #26a69a;
+        }
+      }
+    }
+  }
+}
+
+.container {
+  :global {
+    .ant-pro-card-body {
+      padding: 0;
+    }
+    .ant-pro-page-container-children-content {
+      //background: #ffff;
+    }
+  }
+  .extra {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.icons {
+  :global {
+    .anticon {
+      margin-right: 10px;
+      color: #26a69a;
+      font-size: 16px;
+    }
+  }
+}

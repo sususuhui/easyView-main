@@ -1,10 +1,9 @@
 @import '~antd/lib/style/themes/default.less';
 
 .card {
-  background-color: #f0f2f5;
+  background-color: #f0f2f5 !important;
   :global {
     .ant-pro-card-body {
-      padding: 12px;
       .ant-pro-card-header {
         padding: 12px 12px 0 12px;
       }
@@ -19,7 +18,7 @@
 }
 
 .myModal {
-  top: 0;
+  top: 0 !important;
   width: 100vw !important;
   max-width: 100vw !important;
   height: 100vh;
@@ -48,11 +47,30 @@
       .ant-modal-close-x {
         width: 46px;
         height: 46px;
-        line-height: 48px;
+        line-height: 36px;
       }
       .ant-modal-header {
         padding: 0;
       }
     }
   }
+}
+
+.tabs {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -65px;
+  color: rgba(0, 0, 0, 0.45);
+  line-height: 18px;
+  :global {
+    .ant-tabs-content-holder {
+      display: none;
+    }
+  }
+}
+.operate {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
 }

@@ -1,12 +1,13 @@
 @import '~antd/es/style/themes/default.less';
 
-@menu-dark-bg: #324148;
-@menu-dark-inline-submenu-bg: #263238;
+@menu-dark-bg: #232f34;
+@menu-dark-inline-submenu-bg: #000c17;
 
 html,
 body,
 #root {
   height: 100%;
+  background-color: #f0f2f5;
 }
 
 .colorWeak {
@@ -16,35 +17,26 @@ body,
 .ant-layout {
   min-height: 100vh;
   .ant-layout-header {
-    background-color: @menu-dark-bg;
+    height: 36px !important;
+    line-height: 36px !important;
   }
 }
 
+.ant-affix {
+  top: 36px !important;
+}
+
 .ant-pro-sider.ant-layout-sider-collapsed .ant-pro-sider-logo {
-  padding: 4px;
+  padding: 0;
 }
 .ant-pro-sider-logo {
-  padding: 4px;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0;
   img {
-    height: 36px;
-  }
-}
-.ant-pro-sider.ant-layout-sider.ant-pro-sider-fixed {
-  left: unset;
-  flex: 0 0 220px;
-  width: 220px;
-  min-width: 220px;
-  max-width: 220px;
-  background-color: @menu-dark-bg;
-  .ant-menu-item {
-    font-weight: bold;
-    font-size: 13px;
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.15);
-    }
-  }
-  .ant-menu-sub {
-    background-color: @menu-dark-inline-submenu-bg;
+    height: 28px;
+    margin-left: 10px;
   }
 }
 
@@ -57,8 +49,54 @@ body,
     height: 100%;
   }
   .ant-page-header-heading-title {
-    font-size: 14px;
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 13px;
   }
+}
+
+.ant-pro-sider-extra {
+  min-height: 30px;
+  padding: 0 4px;
+  overflow: auto;
+}
+.ant-pro-sider-footer {
+  background: rgba(0, 0, 0, 0.15);
+  a {
+    &:hover {
+      color: #26a69a !important;
+    }
+  }
+}
+.ant-pro-sider.ant-layout-sider.ant-pro-sider-fixed {
+  left: unset;
+  flex: 0 0 220px;
+  width: 220px;
+  min-width: 220px;
+  max-width: 220px;
+  background-color: @menu-dark-bg;
+  .ant-menu {
+    font-weight: bold;
+    font-size: 13px !important;
+    .ant-menu-item {
+      padding: 0 !important;
+      font-weight: bolder;
+      cursor: text;
+      &:hover {
+        color: rgba(255, 255, 255, 0.65);
+      }
+    }
+    .ant-menu-sub {
+      background-color: @menu-dark-inline-submenu-bg;
+    }
+  }
+}
+
+.ant-drawer-title {
+  font-size: 14px;
+}
+
+.ant-pro-page-container-children-content {
+  margin: 12px;
 }
 
 canvas {

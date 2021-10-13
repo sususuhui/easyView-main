@@ -1,9 +1,40 @@
 import { Button, message, notification } from 'antd';
 import { useIntl } from 'umi';
 import defaultSettings from '../config/defaultSettings';
+import {
+  AccountBookOutlined,
+  ApartmentOutlined,
+  AppstoreOutlined,
+  CloseCircleOutlined,
+  DashboardOutlined,
+  DownloadOutlined,
+  FileWordOutlined,
+  FolderOpenOutlined,
+  FolderOutlined,
+  HomeOutlined,
+  SettingOutlined,
+  FolderFilled,
+  FolderOpenFilled,
+} from '@ant-design/icons';
 
 const { pwa } = defaultSettings;
 const isHttps = document.location.protocol === 'https:';
+
+export const iconMap = {
+  AccountBookOutlined: <AccountBookOutlined />,
+  ApartmentOutlined: <ApartmentOutlined />,
+  AppstoreOutlined: <AppstoreOutlined />,
+  DashboardOutlined: <DashboardOutlined />,
+  DownloadOutlined: <DownloadOutlined />,
+  FileWordOutlined: <FileWordOutlined />,
+  FolderOutlined: <FolderOutlined />,
+  HomeOutlined: <HomeOutlined />,
+  FolderOpenOutlined: <FolderOpenOutlined />,
+  SettingOutlined: <SettingOutlined />,
+  CloseCircleOutlined: <CloseCircleOutlined />,
+  FolderFilled: <FolderFilled />,
+  FolderOpenFilled: <FolderOpenFilled />,
+};
 
 // if pwa is true
 if (pwa) {

@@ -11,6 +11,7 @@ import { message } from 'antd';
 interface ITagParams {
   operate: string;
   params: {
+    tabKey?: string;
     path: string;
     query: any;
   };
@@ -19,10 +20,11 @@ interface ITagParams {
 export default {
   data: {},
   method: {
-    // 打开指定标签页：openTag关闭指定标签页:closeSelectedTag;
+    // 打开指定标签页：openTag;关闭指定标签页:closeSelectedTag;刷新：refreshTag
     // 关闭其它标签closeOthersTags;关闭全部：closeAllTags
     dealTags: (tagParams: ITagParams) => {
       const { params, operate } = tagParams;
+      params.tabKey = params.path;
       if (!operate) {
         message.warning('传入的参数有误');
         return;

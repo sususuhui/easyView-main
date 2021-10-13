@@ -3,7 +3,7 @@ import { defineConfig } from 'umi';
 import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
-import chainWebpackConfig from "./chainWebpackConfig";
+// import chainWebpackConfig from './chainWebpackConfig';
 
 const { REACT_APP_ENV } = process.env;
 
@@ -49,6 +49,6 @@ export default defineConfig({
   qiankun: {
     master: {},
   },
-  chunks: ['vendors', 'umi', 'monaco'],
-  chainWebpack: chainWebpackConfig,
+  // chunks: ['vendors', 'umi', 'monaco'],
+  // chainWebpack: chainWebpackConfig,
 });

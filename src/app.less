@@ -1,0 +1,59 @@
+@import '../node_modules/antd/es/style/themes/default.less';
+
+@menu-dark-bg: #232f34;
+@menu-dark-inline-submenu-bg: #000c17;
+.mySelect {
+  width: 100%;
+  border-radius: 2px;
+  :global {
+    .ant-select-selector {
+      height: 28px !important;
+      color: #fff;
+      font-size: 12px;
+      background: rgba(84, 110, 122, 0.15) !important;
+      border: none !important;
+      border-radius: 2px;
+      box-shadow: none !important;
+    }
+    .ant-select-arrow {
+      color: #fff;
+    }
+  }
+}
+.option {
+  color: rgba(255, 255, 255, 0.65);
+  background-color: #232f34;
+  :global {
+    .ant-select-item {
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 13px;
+      background-color: #232f34;
+      &:hover {
+        color: #fff;
+        background: transparent;
+      }
+    }
+    .ant-select-item-option-active {
+      color: #fff;
+      background: transparent;
+    }
+    .ant-select-item-option-selected {
+      color: #fff;
+      background: transparent;
+    }
+  }
+}
+.title {
+  margin: 0 16px;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 12px;
+}
+.path {
+  padding: 0 16px;
+  a {
+    color: rgba(255, 255, 255, 0.65);
+    &:hover {
+      color: white;
+    }
+  }
+}

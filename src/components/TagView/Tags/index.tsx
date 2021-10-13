@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { history } from 'umi';
 import { Scrollbars } from 'react-custom-scrollbars';
-import { CloseOutlined } from '@ant-design/icons';
+import { CloseOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { TagsItemType } from '../index';
 import styles from './index.less';
+import { Divider } from 'antd';
 
 interface IProps {
   tagList: TagsItemType[];
@@ -64,24 +65,46 @@ const Tags: React.FC<IProps> = ({ tagList, closeTag, closeAllTag, closeOtherTag,
   return (
     <div className={styles.tags_wrapper} ref={tagListRef}>
       <Scrollbars autoHide autoHideTimeout={1000} autoHideDuration={200}>
-        {tagList.map((item, i) => (
+        {tagList.map((item) => (
           <div
-            key={item.path}
+            key={item.tabKey}
             className={item.active ? `${styles.item} ${styles.active}` : styles.item}
-            onClick={() => history.push({ pathname: item.path, query: item.query })}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (item.query?.id) {
+                history.push({
+                  pathname: item.path,
+                  query: item.query,
+                });
+              } else {
+                history.push({
+                  pathname: item.path,
+                });
+              }
+            }}
             onContextMenu={(e) => openContextMenu(e, item)}
           >
             <span>{item.title}</span>
-            {i !== 0 && (
-              <CloseOutlined
-                className={styles.icon_close}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                  closeTag && closeTag(item);
-                }}
-              />
-            )}
+            <ReloadOutlined
+              className={styles.icon_close}
+              onClick={(e) => {
+                e.stopPropagation();
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                refreshTag && refreshTag(item);
+              }}
+            />
+            <CloseOutlined
+              className={styles.icon_close}
+              onClick={(e) => {
+                e.stopPropagation();
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                closeTag && closeTag(item);
+              }}
+            />
+            <Divider
+              type="vertical"
+              style={{ borderLeft: '1px solid #e8e8e8', marginLeft: '10px' }}
+            />
           </div>
         ))}
       </Scrollbars>

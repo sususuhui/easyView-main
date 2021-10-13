@@ -33,9 +33,9 @@ const LoginMessage: React.FC<{
 const goto = () => {
   if (!history) return;
   setTimeout(() => {
-    const { query } = history.location;
-    const { redirect } = query as { redirect: string };
-    history.push(redirect || '/');
+    // const { query } = history.location;
+    // const { redirect } = query as { redirect: string };
+    history.push('/welcome');
   }, 10);
 };
 
