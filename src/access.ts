@@ -22,14 +22,16 @@ const loop = (menu: MenuDataItem[], components: any[]): MenuDataItem[] => {
     }
     return {
       ...item,
+      key: `/iframe/${item.id}`,
       name: item.title,
-      path: `/myHtml/${item.id}`,
+      path: `/iframe/${item.id}`,
       icon: menuIcon ? iconMap[menuIcon] : item.type === 'folder' ? iconMap['FolderFilled'] : '',
       routes: children && loop(children, components),
     };
   });
 };
 
+// 获取菜单信息
 export const loopMenuItem = async (
   menus: MenuDataItem[],
   currentProject: string | undefined,

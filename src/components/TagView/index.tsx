@@ -8,7 +8,6 @@ import store from '@/store/index';
 import RightContent from '@/components/RightContent';
 import { getParamSearch, judgePath } from '@/utils/utils';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-// import { loadMicroApp } from 'qiankun';
 
 export type TagsItemType = {
   title?: string;
@@ -32,7 +31,7 @@ const TagView: React.FC<IProps> = ({ children, home }) => {
   const [tagList, setTagList] = useState<TagsItemType[]>([]);
   const routeContextRef = useRef<RouteContextType>();
   const { setInitialState, initialState } = useModel('@@initialState');
-  const { getCachingNodes, dropScope, refreshScope } = useAliveController();
+  const { getCachingNodes, dropScope, refreshScope, clear } = useAliveController();
   const cachingNodes = getCachingNodes();
   // 初始化 visitedViews
   const initTags = (routeContext: RouteContextType) => {
@@ -57,6 +56,7 @@ const TagView: React.FC<IProps> = ({ children, home }) => {
             path,
             refresh: 0,
             active: true,
+            children,
             query: { id: getParamSearch('id', location.search) },
             tabKey: location.pathname + location.search,
           },
@@ -105,6 +105,7 @@ const TagView: React.FC<IProps> = ({ children, home }) => {
         title: `${title}${beforeTitle ? '-' + beforeTitle : ''}`,
         path,
         refresh: 0,
+        children,
         active: true,
         query: { id: getParamSearch('id', location.search) },
         tabKey: location.pathname + location.search,
@@ -118,6 +119,10 @@ const TagView: React.FC<IProps> = ({ children, home }) => {
       handleOnChange(routeContextRef.current);
     }
   }, [routeContextRef?.current, getParamSearch('id')]);
+
+  useEffect(() => {
+    clear();
+  }, []);
 
   // 关闭标签
   const handleCloseTag = (tag: TagsItemType) => {
@@ -187,6 +192,10 @@ const TagView: React.FC<IProps> = ({ children, home }) => {
             if (temp.name === tag.tabKey) {
               history.push({ pathname: tag?.path, query: tag?.query });
               refreshScope(temp.name as string);
+              // if (tag.tabKey?.includes('/myHtml')) {
+              // } else {
+              //   refreshScope(temp.name as string);
+              // }
             }
           });
         }
@@ -229,7 +238,6 @@ const TagView: React.FC<IProps> = ({ children, home }) => {
         break;
     }
   }, [tagOperation]);
-
   return (
     <>
       <RouteContext.Consumer>

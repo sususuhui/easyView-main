@@ -35,6 +35,13 @@
     hideInMenu: true,
   },
   {
+    path: '/iframe/:id',
+    name: 'iframe',
+    key: 'iframe',
+    component: './Iframe/IframeApp',
+    hideInMenu: true,
+  },
+  {
     path: '/',
     redirect: '/welcome',
     hideInMenu: true,

@@ -111,32 +111,38 @@ export const request: RequestConfig = {
   },
 };
 
+//动态路由配置
 const dynamicRoute = {
   // 注册子应用信息
   apps: [
     {
       name: 'myHtml', // 唯一 id
-      entry: '//localhost:7104', //本地启动
+      entry: '//localhost:7104/', //本地启动
     },
+    // {
+    //   name: 'myHtml1', // 唯一 id
+    //   entry: '//localhost:7105/', //本地启动
+    // },
   ],
 };
 
-const newRoutes = [
-  {
-    name: 'myHtml',
-    path: '/myHtml/:id',
-    exact: true,
-    key: 'myHtml',
-    hideInMenu: true,
-    component: dynamic({
-      loader: () => import('@/pages/MyHtmlMicro'),
-    }),
-  },
-];
+const newRoutes = () => {
+  return [
+    {
+      path: '/myHtml/:id',
+      exact: true,
+      key: 'myHtml',
+      hideInMenu: true,
+      component: dynamic({
+        loader: () => import('@/pages/MyHtmlMicro'),
+      }),
+    },
+  ];
+};
 
 export function patchRoutes(props: { routes: any }) {
   const { routes } = props;
-  newRoutes.forEach((element) => {
+  newRoutes().forEach((element) => {
     routes[0].routes.unshift(element);
   });
 }
@@ -325,6 +331,20 @@ export const layout: RunTimeLayoutConfig = (initialModel) => {
       }
     },
     rightContentRender: () => <TagView home="/welcome" />,
+    // headerRender: () => false,
+    // childrenRender: (
+    //   children: boolean | ReactChild | ReactFragment | ReactPortal | null | undefined,
+    // ) => {
+    //   return (
+    //     <>
+    //       {initialState?.currentUser && location.pathname !== loginPath ? (
+    //         <TagView children={children} home="/welcome" />
+    //       ) : (
+    //         <div>{children}</div>
+    //       )}
+    //     </>
+    //   );
+    // },
     ...initialState?.settings,
   };
 };
@@ -334,7 +354,9 @@ export const qiankun = Promise.resolve({
   apps: dynamicRoute.apps,
   prefetch: true,
   sandbox: true,
-  lifeCycles: {},
+  lifeCycles: {
+    afterMount: () => {},
+  },
 });
 
 export async function render(oldRender: any) {
