@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, message, Modal, notification, Tabs } from 'antd';
 import styles from '@/pages/Customer/index.less';
-import { DesktopOutlined, SaveOutlined, SettingOutlined } from '@ant-design/icons';
+import { SaveOutlined, SettingOutlined } from '@ant-design/icons';
 import TabPane from '@ant-design/pro-card/lib/components/TabPane';
 import MonacoEditor from 'react-monaco-editor';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution';
@@ -9,7 +9,6 @@ import { PageContainer } from '@ant-design/pro-layout';
 import { useDebounceFn } from 'ahooks';
 import { getParamSearch } from '@/utils/utils';
 import { getApps, setApps } from '@/services/app/api';
-import { KeepAlive } from 'umi';
 
 interface ComponentItem {
   id?: string;
@@ -88,7 +87,6 @@ const CustomerJs = () => {
   };
 
   useEffect(() => {
-    console.log('customer mount');
     getApp();
   }, []);
 
@@ -114,14 +112,6 @@ const CustomerJs = () => {
 
   const myExtra = (
     <div className={styles.extra}>
-      <div>
-        <Button
-          icon={<DesktopOutlined />}
-          style={{ display: editorData && editorData.type === 'App' ? 'none' : 'inline-block' }}
-        >
-          预览
-        </Button>
-      </div>
       <div>
         <Button
           icon={<SaveOutlined />}
@@ -207,46 +197,34 @@ const CustomerJs = () => {
     );
   };
 
-  const JsDom = () => {
-    return (
-      <div style={{ height: 'calc(100vh - 250px)', border: '1px solid #dedbdb' }}>
-        <div style={{ height: '100%', width: '100%' }}>
-          <MonacoEditor
-            theme="vs-dark"
-            language="javascript"
-            value={jsCode}
-            onChange={onChangeJs}
-            options={{ selectOnLineNumbers: true, tabSize: 2 }}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const PythonDom = () => {
-    return (
-      <div style={{ height: 'calc(100vh - 250px)', border: '1px solid #dedbdb' }}>
-        <div style={{ height: '100%', width: '100%' }}>
-          <MonacoEditor
-            theme="vs-dark"
-            language="python"
-            value={pyCode}
-            onChange={onChangePython}
-            options={{ selectOnLineNumbers: true, tabSize: 2 }}
-          />
-        </div>
-      </div>
-    );
-  };
-
   return (
     <PageContainer title={myTitle} fixedHeader extra={myExtra} className={styles.container}>
       <Tabs type="card" style={{ padding: '14px', background: '#fff' }}>
         <TabPane tab="自定义js" key="1">
-          <JsDom />
+          <div style={{ height: 'calc(100vh - 250px)', border: '1px solid #dedbdb' }}>
+            <MonacoEditor
+              height="100%"
+              width="100%"
+              theme="vs-dark"
+              language="javascript"
+              value={jsCode}
+              onChange={onChangeJs}
+              options={{ selectOnLineNumbers: true, tabSize: 2 }}
+            />
+          </div>
         </TabPane>
         <TabPane tab="Python" key="2">
-          <PythonDom />
+          <div style={{ height: 'calc(100vh - 250px)', border: '1px solid #dedbdb' }}>
+            <MonacoEditor
+              height="100%"
+              width="100%"
+              theme="vs-dark"
+              language="python"
+              value={pyCode}
+              onChange={onChangePython}
+              options={{ selectOnLineNumbers: true, tabSize: 2 }}
+            />
+          </div>
         </TabPane>
       </Tabs>
       <MyModal />
@@ -256,12 +234,13 @@ const CustomerJs = () => {
 
 export default (): React.ReactNode => {
   return (
-    <KeepAlive
-      id={location.pathname + location.search}
-      name={location.pathname + location.search}
-      saveScrollPosition="screen"
-    >
-      <CustomerJs />
-    </KeepAlive>
+    // <KeepAlive
+    //   id={location.pathname + location.search}
+    //   name={location.pathname + location.search}
+    //   saveScrollPosition="screen"
+    // >
+    //   <CustomerJs />
+    // </KeepAlive>
+    <CustomerJs />
   );
 };

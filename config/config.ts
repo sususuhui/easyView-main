@@ -3,11 +3,17 @@ import { defineConfig } from 'umi';
 import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
-// import chainWebpackConfig from './chainWebpackConfig';
+import chainWebpackConfig from './chainWebpackConfig';
 
-const { REACT_APP_ENV } = process.env;
+const { REACT_APP_ENV, PUBLIC_PATH } = process.env;
+// const PUBLIC_PATH = '/documents/';
 
 export default defineConfig({
+  define: {
+    PUBLIC_PATH: process.env.PUBLIC_PATH
+      ? process.env.PUBLIC_PATH.substring(0, process.env.PUBLIC_PATH.length - 1)
+      : '',
+  },
   hash: true,
   antd: {},
   dva: {
@@ -31,6 +37,10 @@ export default defineConfig({
   targets: {
     ie: 11,
   },
+  history: { type: 'browser' },
+  base: PUBLIC_PATH ? PUBLIC_PATH : undefined,
+  publicPath: PUBLIC_PATH ? PUBLIC_PATH : undefined,
+  outputPath: 'documents',
   // umi routes: https://umijs.org/docs/routing
   routes,
   // Theme for antd: https://ant.design/docs/react/customize-theme-cn
@@ -50,5 +60,5 @@ export default defineConfig({
     master: {},
   },
   // chunks: ['vendors', 'umi', 'monaco'],
-  // chainWebpack: chainWebpackConfig,
+  chainWebpack: chainWebpackConfig,
 });

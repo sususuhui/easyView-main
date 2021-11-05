@@ -217,7 +217,9 @@ function ComponentList() {
         }
       });
     } else {
-      editorFun(record);
+      history.push({
+        pathname: `/iframe/${record.id}`,
+      });
     }
   };
 
@@ -444,7 +446,6 @@ function ComponentList() {
   };
 
   useEffect(() => {
-    console.log('componentList mount');
     initialEffect().then();
   }, []);
 

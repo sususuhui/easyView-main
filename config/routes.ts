@@ -37,7 +37,6 @@
   {
     path: '/iframe/:id',
     name: 'iframe',
-    key: 'iframe',
     component: './Iframe/IframeApp',
     hideInMenu: true,
   },

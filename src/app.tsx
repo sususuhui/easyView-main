@@ -13,6 +13,8 @@ import { loopMenuItem } from './access';
 import { getApps } from '@/services/app/api';
 import TreeMenu from '@/components/TreeMenu';
 import { Key } from 'rc-select/lib/interface/generator';
+import tagsUtil from '@/utils/tags';
+const { method: dealTags } = tagsUtil;
 
 const { Option } = Select;
 const logoInfo = require('/public/logo-seepln-easyview1.png');
@@ -140,12 +142,12 @@ const newRoutes = () => {
   ];
 };
 
-export function patchRoutes(props: { routes: any }) {
-  const { routes } = props;
-  newRoutes().forEach((element) => {
-    routes[0].routes.unshift(element);
-  });
-}
+// export function patchRoutes(props: { routes: any }) {
+//   const { routes } = props;
+//   newRoutes().forEach((element) => {
+//     routes[0].routes.unshift(element);
+//   });
+// }
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 //@ts-ignore
@@ -224,11 +226,11 @@ export const layout: RunTimeLayoutConfig = (initialModel) => {
         return false;
       }
     },
-    actionRef: layoutActionRef,
     menu: {
       locale: false,
       params: {
         appId: initialState?.appId,
+        menuMode: initialState?.menuMode,
         currentProject: initialState?.currentProject,
       },
       request: async (params: { appId: any }) => {
@@ -246,7 +248,7 @@ export const layout: RunTimeLayoutConfig = (initialModel) => {
                 message: '',
               });
             } else {
-              //获取当前appId下的主菜单type为Menu，key为main
+              //获取当前appId下的主菜单type为Menu，key为main的主菜单
               if (res && res.length) {
                 const menu = res.filter((temp: { key: string }) => temp.key === 'main');
                 if (menu && menu.length) {
@@ -290,7 +292,7 @@ export const layout: RunTimeLayoutConfig = (initialModel) => {
             const newAppId = menuMode === 'menu' ? '' : localStorage.getItem('appId');
             setInitialState({
               ...initialState,
-              menuMode: localStorage.getItem('menu_mode'),
+              menuMode: menuMode === 'menu' ? 'element' : 'menu',
               appId: newAppId,
             });
           }}
@@ -349,16 +351,16 @@ export const layout: RunTimeLayoutConfig = (initialModel) => {
   };
 };
 
-export const qiankun = Promise.resolve({
-  // 注册子应用信息
-  apps: dynamicRoute.apps,
-  prefetch: true,
-  sandbox: true,
-  lifeCycles: {
-    afterMount: () => {},
-  },
-});
-
-export async function render(oldRender: any) {
-  oldRender();
-}
+// export const qiankun = Promise.resolve({
+//   // 注册子应用信息
+//   apps: dynamicRoute.apps,
+//   prefetch: true,
+//   sandbox: true,
+//   lifeCycles: {
+//     afterMount: () => {},
+//   },
+// });
+//
+// export async function render(oldRender: any) {
+//   oldRender();
+// }

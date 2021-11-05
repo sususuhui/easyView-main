@@ -1,5 +1,6 @@
 import { iconMap } from '@/global';
 import { RouteContextType } from '@ant-design/pro-layout';
+import { getApps } from '@/services/app/api';
 
 const reg =
   /(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/;
@@ -113,42 +114,62 @@ export function hierarchyData(
  * 判断路径是否存在路由或者菜单中
  * @param path 路径字符串
  */
-export function judgePath(path: string, routeContext: RouteContextType) {
+export async function judgePath(path: string, routeContext: RouteContextType) {
+  // @ts-ignore
+  const publicPath = PUBLIC_PATH ? PUBLIC_PATH : '/documents';
   let returnMenu: any = {
     path: '/404',
     title: '404',
   };
+  const actualPath = path.replace(publicPath, '');
   const {
     currentMenu,
     // @ts-ignore
     route: { routes },
   } = routeContext;
-  if (
-    currentMenu &&
-    currentMenu.path &&
-    (currentMenu.path === path || (currentMenu.key && path.includes(currentMenu.key)))
-  ) {
+
+  const queryNameMethod = async () => {
+    const id = path.split('/iframe/');
+    let queryName = '';
+    if (id && id.length >= 2) {
+      const res = await getApps({ id: id[1] });
+      if (res.err) {
+        const result = await getApps({ key: id[1] });
+        queryName = result.res && result.res.length > 0 ? result.res[0].name : 'iframe';
+      } else {
+        queryName = res.res && res.res.length > 0 ? res.res[0].name : 'iframe';
+      }
+    }
+    return queryName;
+  };
+
+  if (currentMenu && currentMenu.path && currentMenu.name && path.includes(currentMenu.name)) {
     returnMenu = currentMenu;
     returnMenu.title = currentMenu.name;
-    returnMenu.path = path;
+    returnMenu.path = actualPath;
   } else {
     const loop = (data: any[]) => {
       if (data && data.length > 0) {
-        data.forEach((item) => {
+        data.forEach(async (item) => {
           if (item.children && item.children.length > 0) {
             loop(item.children);
           }
-          if (item.path === path || (item.key && path.includes(item.key))) {
-            returnMenu = item;
-            returnMenu.title = item.name;
-            returnMenu.path = path;
+          if (item.name && (path.includes(item.path) || path.includes(item.name))) {
+            returnMenu = { ...item, title: item.name, path: actualPath };
           }
         });
       }
+      return returnMenu;
     };
+
     if (routes && routes.length) {
       loop(routes);
     }
+  }
+  if (returnMenu.name === 'iframe') {
+    // 根据id查找tag名称
+    const res = await queryNameMethod();
+    returnMenu.title = res ? res : returnMenu.title;
   }
   return returnMenu;
 }

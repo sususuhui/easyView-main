@@ -1,5 +1,5 @@
 import { request } from 'umi';
-
+const ip = 'https://easyview.deepfos.com/easyview/Api';
 /**
  * @Description: 对组件应用表的操作
  * @author suhui.bai@proinnova.com.cn
@@ -8,7 +8,7 @@ import { request } from 'umi';
 /** 查询所有应用/单个应用 {type:'App'}/{id:1}*/
 /** 查询指定content-json {id:1,fields:["name","content"]}*/
 export async function getApps(body: API.AppItem, options?: { [key: string]: any }) {
-  return request('/api/Get', {
+  return request(`${ip}/Get`, {
     method: 'POST',
     data: body,
     ...(options || {}),
@@ -16,7 +16,7 @@ export async function getApps(body: API.AppItem, options?: { [key: string]: any 
 }
 
 export async function setApps(body: API.AppItem, options?: { [key: string]: any }) {
-  return request('/api/Set', {
+  return request(`${ip}/Set`, {
     method: 'POST',
     data: body,
     ...(options || {}),

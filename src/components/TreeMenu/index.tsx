@@ -31,8 +31,8 @@ export default () => {
   const { initialState } = useModel('@@initialState');
 
   /** 数据处理：做层级数据结构 **/
-  const dealData = (newArray: TreeItem[]) => {
-    const { afterData } = hierarchyData(newArray, 'ud1', componentData, '');
+  const dealData = (newArray: TreeItem[], queryComponentData: TreeItem[]) => {
+    const { afterData } = hierarchyData(newArray, 'ud1', queryComponentData, '');
     // 数据处理：文件夹数据显示在表格最前面
     const tempType: TreeItem[] = afterData.filter((item) => {
       return item.type === 'Folder';
@@ -67,26 +67,24 @@ export default () => {
     }).then();
   };
   useEffect(() => {
-    // 查询组件类型图标
-    getApp({ type: 'Component' }).then((res: any) => {
+    const showMenu = async () => {
+      // 查询组件类型图标
+      const res = (await getApp({ type: 'Component' })) as any;
       if (res && res.success) {
         setComponentData(res.data);
+        const param = { app: localStorage.getItem('appId') ? localStorage.getItem('appId') : '' };
+        // 查询所有资源数据
+        getApp(param).then((result: any) => {
+          if (result && result.success) {
+            setFlatData(JSON.parse(JSON.stringify(result.data)));
+            const after = dealData(result.data, res.data) as TreeDataNode[];
+            setTreeData(after);
+          }
+        });
       }
-    });
-  }, [initialState?.appId]);
-  useEffect(() => {
-    if (componentData) {
-      const param = { app: localStorage.getItem('appId') ? localStorage.getItem('appId') : '' };
-      // 查询所有资源数据
-      getApp(param).then((result: any) => {
-        if (result && result.success) {
-          setFlatData(JSON.parse(JSON.stringify(result.data)));
-          const after = dealData(result.data) as TreeDataNode[];
-          setTreeData(after);
-        }
-      });
-    }
-  }, [componentData]);
+    };
+    showMenu();
+  }, [initialState?.appId, initialState?.menuMode]);
 
   const onSelect = (keys: React.Key[], info: any) => {
     console.log('Trigger Select', keys, info);
@@ -115,7 +113,7 @@ export default () => {
         }
       });
       setFlatData(JSON.parse(JSON.stringify(newFlatData)));
-      const after = dealData(newFlatData) as TreeDataNode[];
+      const after = dealData(newFlatData, componentData) as TreeDataNode[];
       setTreeData(after);
     }
   };
