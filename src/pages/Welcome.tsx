@@ -1,17 +1,12 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Form, Input, message, Modal, notification, Popconfirm, Space, Tabs } from 'antd';
-import {
-  DeleteOutlined,
-  EditOutlined,
-  EllipsisOutlined,
-  PlusCircleOutlined,
-} from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, EllipsisOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import ProCard from '@ant-design/pro-card';
 import styles from './Welcome.less';
 import { deleteApps, getApps, setApps } from '../services/app/api';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution';
-import { history, KeepAlive } from 'umi';
+import { history } from 'umi';
 import TabPane from '@ant-design/pro-card/es/components/TabPane';
 import ManageList from '@/components/ManageList';
 import { useModel } from '@@/plugin-model/useModel';
@@ -292,13 +287,5 @@ function Welcome() {
 }
 
 export default (): React.ReactNode => {
-  return (
-    <KeepAlive
-      id={location.pathname + location.search}
-      name={location.pathname + location.search}
-      saveScrollPosition="screen"
-    >
-      <Welcome />
-    </KeepAlive>
-  );
+  return <Welcome />;
 };

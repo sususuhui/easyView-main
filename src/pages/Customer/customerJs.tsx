@@ -233,14 +233,5 @@ const CustomerJs = () => {
 };
 
 export default (): React.ReactNode => {
-  return (
-    // <KeepAlive
-    //   id={location.pathname + location.search}
-    //   name={location.pathname + location.search}
-    //   saveScrollPosition="screen"
-    // >
-    //   <CustomerJs />
-    // </KeepAlive>
-    <CustomerJs />
-  );
+  return <CustomerJs />;
 };

@@ -3,7 +3,7 @@ import { PageLoading } from '@ant-design/pro-layout';
 import { notification, Select } from 'antd';
 // @ts-ignore
 import type { RequestConfig, RunTimeLayoutConfig } from 'umi';
-import { dynamic, history } from 'umi';
+import { history } from 'umi';
 import TagView from '@/components/TagView';
 import type { ReactChild, ReactFragment, ReactPortal } from 'react';
 import { createRef } from 'react';
@@ -13,8 +13,6 @@ import { loopMenuItem } from './access';
 import { getApps } from '@/services/app/api';
 import TreeMenu from '@/components/TreeMenu';
 import { Key } from 'rc-select/lib/interface/generator';
-import tagsUtil from '@/utils/tags';
-const { method: dealTags } = tagsUtil;
 
 const { Option } = Select;
 const logoInfo = require('/public/logo-seepln-easyview1.png');
@@ -112,42 +110,6 @@ export const request: RequestConfig = {
     throw error;
   },
 };
-
-//动态路由配置
-const dynamicRoute = {
-  // 注册子应用信息
-  apps: [
-    {
-      name: 'myHtml', // 唯一 id
-      entry: '//localhost:7104/', //本地启动
-    },
-    // {
-    //   name: 'myHtml1', // 唯一 id
-    //   entry: '//localhost:7105/', //本地启动
-    // },
-  ],
-};
-
-const newRoutes = () => {
-  return [
-    {
-      path: '/myHtml/:id',
-      exact: true,
-      key: 'myHtml',
-      hideInMenu: true,
-      component: dynamic({
-        loader: () => import('@/pages/MyHtmlMicro'),
-      }),
-    },
-  ];
-};
-
-// export function patchRoutes(props: { routes: any }) {
-//   const { routes } = props;
-//   newRoutes().forEach((element) => {
-//     routes[0].routes.unshift(element);
-//   });
-// }
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 //@ts-ignore
@@ -325,28 +287,26 @@ export const layout: RunTimeLayoutConfig = (initialModel) => {
       logo: boolean | ReactChild | ReactFragment | ReactPortal | null | undefined,
     ) => <div id="customize_menu_header">{logo}</div>,
     disableContentMargin: false,
-    onPageChange: () => {
-      const { location } = history;
-      // 如果没有登录，重定向到 login
-      if (!initialState?.currentUser && location.pathname !== loginPath) {
-        history.push(loginPath);
-      }
-    },
-    rightContentRender: () => <TagView home="/welcome" />,
-    // headerRender: () => false,
-    // childrenRender: (
-    //   children: boolean | ReactChild | ReactFragment | ReactPortal | null | undefined,
-    // ) => {
-    //   return (
-    //     <>
-    //       {initialState?.currentUser && location.pathname !== loginPath ? (
-    //         <TagView children={children} home="/welcome" />
-    //       ) : (
-    //         <div>{children}</div>
-    //       )}
-    //     </>
-    //   );
+    // onPageChange: () => {
+    //   const { location } = history;
+    //   // 如果没有登录，重定向到 login
+    //   if (!initialState?.currentUser && location.pathname !== loginPath) {
+    //     history.push(loginPath);
+    //   }
     // },
+    childrenRender: (
+      children: boolean | ReactChild | ReactFragment | ReactPortal | null | undefined,
+    ) => {
+      return (
+        <>
+          {initialState?.currentUser && location.pathname !== loginPath ? (
+            <TagView children={children} home="/welcome" />
+          ) : (
+            <div>{children}</div>
+          )}
+        </>
+      );
+    },
     ...initialState?.settings,
   };
 };

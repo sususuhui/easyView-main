@@ -5,6 +5,7 @@ import { getApps } from '@/services/app/api';
 import { EventDataNode } from 'rc-tree/lib/interface';
 import { hierarchyData } from '@/utils/utils';
 import { useModel } from '@@/plugin-model/useModel';
+import { history } from '@@/core/history';
 
 const { DirectoryTree } = Tree;
 interface TreeItem {
@@ -87,6 +88,9 @@ export default () => {
   }, [initialState?.appId, initialState?.menuMode]);
 
   const onSelect = (keys: React.Key[], info: any) => {
+    history.push({
+      pathname: `/iframe/${info.node.id}`,
+    });
     console.log('Trigger Select', keys, info);
   };
 

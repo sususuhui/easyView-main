@@ -114,7 +114,7 @@ export function hierarchyData(
  * 判断路径是否存在路由或者菜单中
  * @param path 路径字符串
  */
-export async function judgePath(path: string, routeContext: RouteContextType) {
+export async function judgePath(path: string, routeContext: RouteContextType, currentTag?: any) {
   // @ts-ignore
   const publicPath = PUBLIC_PATH ? PUBLIC_PATH : '/documents';
   let returnMenu: any = {
@@ -167,9 +167,13 @@ export async function judgePath(path: string, routeContext: RouteContextType) {
     }
   }
   if (returnMenu.name === 'iframe') {
-    // 根据id查找tag名称
-    const res = await queryNameMethod();
-    returnMenu.title = res ? res : returnMenu.title;
+    if (currentTag && currentTag.title) {
+      returnMenu.title = currentTag.title;
+    } else {
+      // 根据id查找tag名称
+      const res = await queryNameMethod();
+      returnMenu.title = res ? res : returnMenu.title;
+    }
   }
   return returnMenu;
 }

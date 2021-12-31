@@ -20,7 +20,7 @@ import { deleteApps, getApps, setApps } from '@/services/app/api';
 import { flatData, getParamSearch, hierarchyData } from '@/utils/utils';
 import styles from './index.less';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution';
-import { history, KeepAlive } from 'umi';
+import { history } from 'umi';
 import MyBreadcrumds from '@/components/MyBreadcrumd';
 import { iconMap } from '@/global';
 
@@ -58,7 +58,7 @@ function ComponentList() {
   // 抽屉弹出框标题
   const [title, setTitle] = useState('新建文件夹');
   // 当前应用id
-  const [app] = useState(getParamSearch('id'));
+  const [app, setAppId] = useState(getParamSearch('id'));
   // 当前文件夹id
   const [folderId, setFolderId] = useState('');
   const initBread: ComponentItem[] = [];
@@ -439,13 +439,13 @@ function ComponentList() {
 
   const initialEffect = async () => {
     const { res } = await getApps({ type: 'Component' });
-    if (res.err) {
-    } else {
+    if (!res.err) {
       setComponentType(res);
     }
   };
 
   useEffect(() => {
+    setAppId(getParamSearch('id'));
     initialEffect().then();
   }, []);
 
@@ -620,13 +620,5 @@ function ComponentList() {
 }
 
 export default (): React.ReactNode => {
-  return (
-    <KeepAlive
-      id={location.pathname + location.search}
-      name={location.pathname + location.search}
-      saveScrollPosition="screen"
-    >
-      <ComponentList />
-    </KeepAlive>
-  );
+  return <ComponentList />;
 };

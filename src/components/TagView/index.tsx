@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { RouteContextType } from '@ant-design/pro-layout';
 import { RouteContext } from '@ant-design/pro-layout';
-import { useAliveController, useModel } from 'umi';
+import { useModel } from 'umi';
 import Tags from './Tags';
 import styles from './index.less';
 import store from '@/store/index';
 import RightContent from '@/components/RightContent';
 import useTabView from '@/components/TagView/TagViewHook';
-import { getParamSearch } from '@/utils/utils';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
+import { getParamSearch } from '@/utils/utils';
 
 export type TagsItemType = {
   title?: string;
@@ -16,7 +16,7 @@ export type TagsItemType = {
   active?: boolean;
   query?: any;
   children?: any;
-  refresh?: number;
+  refresh: number;
   id?: string;
   tabKey?: string;
 };
@@ -31,7 +31,6 @@ interface IProps {
 const TagView: React.FC<IProps> = ({ children, home }) => {
   const routeContextRef = useRef<RouteContextType>();
   const { setInitialState, initialState } = useModel('@@initialState');
-  const { clear } = useAliveController();
   const {
     tagList,
     handleRefreshTag,
@@ -43,14 +42,15 @@ const TagView: React.FC<IProps> = ({ children, home }) => {
 
   useEffect(() => {
     if (routeContextRef?.current) {
-      handleOnChange(routeContextRef.current);
+      const tabKey = location.pathname + location.search;
+      const currentTag = tagList.filter((item) => item.tabKey === tabKey);
+      handleOnChange(
+        routeContextRef.current,
+        currentTag && currentTag.length > 0 ? currentTag[0] : '',
+      );
     }
     // @ts-ignore
-  }, [routeContextRef?.current?.location?.pathname, getParamSearch('id')]);
-
-  useEffect(() => {
-    clear();
-  }, []);
+  }, [routeContextRef?.current, getParamSearch('id', location.search)]);
 
   const [tagOperation, setTagOperation] = useState(store.getState().countReducer);
   store.subscribe(() => {
@@ -84,12 +84,12 @@ const TagView: React.FC<IProps> = ({ children, home }) => {
     <>
       <RouteContext.Consumer>
         {(value: RouteContextType) => {
-          // @ts-ignore
-          value.route.routes.map((item: { name: string; path: string }) => {
-            if (item.name === 'iframe') {
-              item.path = '/iframe/:id';
-            }
-          });
+          // // @ts-ignore
+          // value.route.routes.map((item: { name: string; path: string }) => {
+          //   if (item.name === 'iframe') {
+          //     item.path = '/iframe/:id';
+          //   }
+          // });
           routeContextRef.current = value;
           return null;
         }}
@@ -124,6 +124,13 @@ const TagView: React.FC<IProps> = ({ children, home }) => {
         />
         <RightContent />
       </div>
+      {tagList.map((item) => {
+        return (
+          <div key={item.tabKey} style={{ display: item.active ? 'block' : 'none' }}>
+            <div key={item.refresh}>{item.children}</div>
+          </div>
+        );
+      })}
     </>
   );
 };

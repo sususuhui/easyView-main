@@ -1,7 +1,7 @@
 import { MicroApp } from 'umi';
 import tagUtil from '@/utils/tags';
 import React, { useEffect } from 'react';
-import { Provider, KeepAlive } from 'react-keep-alive';
+import { Provider } from 'react-keep-alive';
 
 const {
   method: { dealTags },
@@ -22,12 +22,7 @@ export default (): React.ReactNode => {
     //   <HtmlMicro />
     // </KeepAlive>
     <Provider>
-      <KeepAlive
-        key={location.pathname + location.search}
-        name={location.pathname + location.search}
-      >
-        <HtmlMicro />
-      </KeepAlive>
+      <HtmlMicro />
     </Provider>
   );
 };
